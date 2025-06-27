@@ -1,3 +1,5 @@
+from dotenv import load_dotenv
+load_dotenv()
 from openai import OpenAI
 
 # Initialize OpenAI client
@@ -12,13 +14,13 @@ def analyze_sentiment(review):
     # 1. Asks for sentiment analysis
     # 2. Specifies the required output format
     #       thought: [analysis]
-    #       sentiment: [positive/negative]
+    #       sentiment: [positive/negative/mixed]
     # 3. Includes the review text
     prompt = f"""
     Analyze the sentiment of the following movie review. Provide your analysis in exactly this format:
     
     thought: [Your detailed analysis of the review]
-    sentiment: [positive or negative]
+    sentiment: [positive, negative, or mixed]
     
     Review: {review}
     """
@@ -30,13 +32,22 @@ def analyze_sentiment(review):
     )
 
     content = response.choices[0].message.content
-    # TODO: Parse the response to extract thought and sentiment
-    # The response should be in the format:
-    # thought: [analysis]
-    # sentiment: [positive/negative]
+    
+    # Parse the response to extract thought and sentiment
+    lines = content.strip().split('\n')
+    thought = ""
+    sentiment = ""
+    
+    for line in lines:
+        line = line.strip()
+        if line.startswith("thought:"):
+            thought = line.replace("thought:", "").strip()
+        elif line.startswith("sentiment:"):
+            sentiment = line.replace("sentiment:", "").strip()
+    
     result = {
-        "thought": "",  # TODO: Extract thought
-        "sentiment": ""  # TODO: Extract sentiment
+        "thought": thought,
+        "sentiment": sentiment
     }
     
     return result
@@ -57,4 +68,4 @@ def main():
         print(f"Sentiment: {result['sentiment']}")
 
 if __name__ == "__main__":
-    main() 
+    main()
