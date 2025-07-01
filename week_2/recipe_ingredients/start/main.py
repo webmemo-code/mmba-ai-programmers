@@ -3,18 +3,25 @@ from pydantic import BaseModel, Field
 from typing import List
 from pprint import pprint
 import os
+from dotenv import load_dotenv
 
-# TODO: Add a new Ingredients model that can be used in the Recipe model with the following properties:
-# - amount
-# - unit
-# - name
+# Load environment variables from .env file
+load_dotenv()
+
+class Ingredient(BaseModel):
+    """
+    Represents a single ingredient in a recipe with its quantity and unit.
+    """
+    amount: float = Field(description="The quantity of the ingredient")
+    unit: str = Field(description="The unit of measurement (e.g., cups, tablespoons, grams)")
+    name: str = Field(description="The name of the ingredient")
 
 class Recipe(BaseModel):
     """
     Use this model when working with complete cooking recipes.
     """
     title: str = Field(description="Name of the recipe")
-    ingredients: List[str] = Field(description="List of ingredients needed for the recipe")
+    ingredients: List[Ingredient] = Field(description="List of ingredients needed for the recipe")
     instructions: List[str] = Field(description="Step-by-step instructions to prepare the recipe")
 
 def get_recipe_from_text(recipe_text: str) -> Recipe:
