@@ -2,6 +2,7 @@
 **/venv/
 **/env/
 **/.env
+**/.claude
 # Python cache files
 **/__pycache__/
 **/*.pyc
