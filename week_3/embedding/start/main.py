@@ -10,14 +10,13 @@ texts = [
 ]
 
 def get_embedding(text):
-    # TODO: Implement the OpenAI embedding functionality
-    # Documentation: https://platform.openai.com/docs/guides/embeddings
-    # 1. Create an OpenAI client
-    # 2. Make an API call to generate embeddings using the text-embedding-3-small model
-    # 3. Return the embedding vector from the response
+    client = OpenAI()
+    response = client.embeddings.create(
+        model="text-embedding-3-small",
+        input=text
+    )
     
-    # Placeholder for the actual implementation
-    return [0] * 1536  # Placeholder with the expected dimension
+    return response.data[0].embedding
 
 embeddings = []
 for text in texts:
@@ -30,11 +29,13 @@ index = faiss.IndexFlatL2(dimension)
 
 index.add(numpy.array(embeddings, dtype='float32'))
 
-query = 'Tell me about a prison movie'
+query = 'Tell me about a dreams movie'
 
 query_embedding = get_embedding(query)
 distances, indicies = index.search(numpy.array([query_embedding], dtype='float32'), 3)
 
+print("Best Matches with Distance (lower is better):")
 for i in range(3):
-    # print(f"Match {i+1}, Distance: {distances[0][i]:.f4}")
-    print(texts[indicies[0][i]]) 
+    print(f"Match {i+1}, Distance: {distances[0][i]:.4f}")
+    print(texts[indicies[0][i]])
+    print() 
