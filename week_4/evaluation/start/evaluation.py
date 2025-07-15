@@ -1,13 +1,13 @@
 import json
 import os
 from openai import OpenAI
-from langsmith.evaluation import evaluate
+from langsmith.evaluation import evaluate as langsmith_evaluate
 
 # Initialize the OpenAI client
 client = OpenAI()
 
 # Dataset name in LangSmith (already uploaded)
-dataset_name = "news_dataset_class"
+dataset_name = "news_dataset"
 
 # System prompt for extraction
 SYSTEM_PROMPT = """Extract information from the news into a dictionary. 
@@ -41,8 +41,18 @@ def make_call_to_llm(input):
 # It contains the model's response that we'll compare against the expected output
 def perform_eval(llm_result, dataset_item):
     try:
-        # Parse the model's output
-        llm_output = json.loads(llm_result.outputs['output'])
+        # Clean the model's output by removing markdown code blocks
+        raw_output = llm_result.outputs['output']
+        if '```json' in raw_output:
+            # Extract JSON from markdown code blocks
+            start = raw_output.find('```json') + 7
+            end = raw_output.find('```', start)
+            cleaned_output = raw_output[start:end].strip()
+        else:
+            cleaned_output = raw_output.strip()
+        
+        # Parse the cleaned model's output
+        llm_output = json.loads(cleaned_output)
         
         # Parse the expected output
         expected_output = json.loads(dataset_item.outputs['output'])
@@ -58,8 +68,18 @@ def perform_eval(llm_result, dataset_item):
         # Handle the case where JSON parsing fails
         return {"score": 0.0}
 
-# Evaluate the target task
-# TODO: Implement the evaluate function to run the evaluation
-# See https://docs.smith.langchain.com/evaluation for reference and examples
-# This should evaluate make_call_to_llm against the dataset_name using perform_eval
-# and create an experiment with the prefix "news_extraction_homework"
+def evaluate():
+    # Evaluate the target task
+    results = langsmith_evaluate(
+        make_call_to_llm,
+        data=dataset_name,
+        evaluators=[perform_eval],
+        experiment_prefix="news_extraction_homework",
+    )
+    
+    print(f"Evaluation results: {results}")
+    return results
+
+# Run the evaluation
+if __name__ == "__main__":
+    evaluate()
