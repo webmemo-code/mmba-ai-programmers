@@ -28,7 +28,7 @@ def load_documents():
     files = glob.glob(path)
     
     for file_path in files:
-        with open(file_path, 'r') as file:
+        with open(file_path, 'r', encoding='utf-8') as file:
             content = file.read()
             documents.append({"content": content, "metadata": {"source": file_path}})
     
@@ -114,14 +114,17 @@ def search_documents(query, namespace, top_k=5):
     docs_with_scores = []
     for match in results["matches"]:
         # Load the document content based on the source file
-        with open(match["metadata"]["source"], 'r') as f:
+        with open(match["metadata"]["source"], 'r', encoding='utf-8') as f:
             content = f.read()
         docs_with_scores.append((content, match["score"]))
     
     return docs_with_scores
 
-# TODO: Add traceable decorator to track this function in LangSmith
-# Example: https://docs.smith.langchain.com/observability/how_to_guides/log_traces_to_project
+@traceable(
+    name="ask_openai",
+    project_name=langsmith_project,
+    run_type="llm"
+)
 def ask_openai(query, documents):
     """Ask OpenAI a question with context from the documents."""
     # Join all documents into a single context string
@@ -144,8 +147,14 @@ def ask_openai(query, documents):
     return response.choices[0].message.content
 
 if __name__ == "__main__":
+    # Step 1: Load and embed documents (execute only once to populate the index)
+    # documents = load_documents()
+    # chunks = chunk_documents(documents)
+    # embed_documents(chunks, namespace="chunks")
+
     # Step 2: Write a query
-    user_query = "When did Berkshire Hathaway purchase it's first coke stock?" # Year: 1988
+    # user_query = "When did Berkshire Hathaway purchase it's first coke stock?" # Year: 1988
+    user_query = "What are the 7 largest non-financial units of Berkshire Hathaway?"  # Buffalo News, etc.
 
     # Step 3: Check Pinecone for similar chunks
     docs_and_scores = search_documents(query=user_query, namespace="chunks")
