@@ -18,6 +18,8 @@ langsmith_client = Client(api_key=langsmith_api_key)
 INDEX_NAME = "test"
 EMBEDDING_MODEL = "text-embedding-3-small"
 CHAT_MODEL = "gpt-4o-mini-2024-07-18"
+LANGSMITH_TRACING="true"
+LANGSMITH_ENDPOINT="https://api.smith.langchain.com"
 
 @traceable(name="load_documents")
 def load_documents():
@@ -154,7 +156,8 @@ if __name__ == "__main__":
 
     # Step 2: Write a query
     # user_query = "When did Berkshire Hathaway purchase it's first coke stock?" # Year: 1988
-    user_query = "What are the 7 largest non-financial units of Berkshire Hathaway?"  # Buffalo News, etc.
+    # user_query = "What are the 7 largest non-financial units of Berkshire Hathaway?"  # Buffalo News, etc.
+    user_query = "What is Warren Buffett's main investment principle, i.e. secret?"  # Buffalo News, etc.
 
     # Step 3: Check Pinecone for similar chunks
     docs_and_scores = search_documents(query=user_query, namespace="chunks")
