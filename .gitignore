@@ -3,6 +3,7 @@
 **/env/
 **/.env
 **/.claude
+**/.claudeignore
 # Python cache files
 **/__pycache__/
 **/*.pyc
