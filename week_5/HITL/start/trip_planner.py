@@ -16,6 +16,15 @@ from openai import OpenAI
 import os
 from pydantic import BaseModel, Field
 
+# Load environment variables from .env file manually
+env_path = "../../../.env"
+if os.path.exists(env_path):
+    with open(env_path) as f:
+        for line in f:
+            if line.strip() and not line.startswith('#') and '=' in line:
+                key, value = line.strip().split('=', 1)
+                os.environ[key] = value
+
 @dataclass
 class TripPlan:
     """Represents a complete trip plan."""
@@ -141,6 +150,12 @@ class TripPlanner:
         print(f"Flight: {suggested_flight.flight_number}")
         print(f"Departure: {suggested_flight.departure_time}")
         print(f"Arrival: {suggested_flight.arrival_time}")
+        
+        # Check the flight suggestion
+        if self.get_human_confirmation("Would you take this flight?"):
+            flight_info = suggested_flight
+        else:
+            flight_info = suggested_flight  # Keep suggested flight for now
         
         # Step 3: Itinerary Generation
         suggested_itinerary = self.generate_itinerary(destination)

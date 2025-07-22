@@ -17,8 +17,14 @@ import os
 from typing import Dict, List, Optional
 import openai
 
-# Configure your OpenAI API key (in a real app, use environment variables)
-# openai.api_key = os.environ.get("OPENAI_API_KEY")
+# Load environment variables from .env file manually
+env_path = "../../../.env"
+if os.path.exists(env_path):
+    with open(env_path) as f:
+        for line in f:
+            if line.strip() and not line.startswith('#') and '=' in line:
+                key, value = line.strip().split('=', 1)
+                os.environ[key] = value
 
 class CustomerServiceChain:
     """
